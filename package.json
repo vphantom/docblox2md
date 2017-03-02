@@ -1,0 +1,27 @@
+{
+  "name": "inline2md",
+  "version": "0.0.1",
+  "description": "Generate Markdown from inline code comments",
+  "main": "inline2md.js",
+  "bin": {
+    "inline2md": "./cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Stéphane Lavergne <lis@imars.com> (https://github.com/vphantom)",
+  "license": "MIT",
+  "files": [
+    "LICENSE.txt",
+    "README.md",
+    "cli.js",
+    "inline2md.js"
+  ],
+  "devDependencies": {
+    "coveralls": "^2.11.16",
+    "eslint": "^3.16.1",
+    "faucet": "0.0.1",
+    "istanbul": "^0.4.5",
+    "tape": "^4.6.3"
+  }
+}
