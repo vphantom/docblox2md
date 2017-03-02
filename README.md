@@ -45,7 +45,7 @@ Anywhere you want to insert the documentation for a specific file, insert an HTM
 
 The generated Markdown documentation will be inserted between these two comments.  If there was already anything between them, it will be replaced by freshly generated documentation, so it is very easy to keep your Markdown files up to date.
 
-To better adapt to your documents, you can optionally specify the header level to start with before the file name.  For OO projects, this will be the header level for classes, and properties and methods will get the next level after that.
+To better adapt to your documents, you can optionally specify the header level to start with before the file name.  For OO projects, this will be the header level for classes, and properties and methods will get the next level after that.  It is `H1` by default.
 
 ```md
 ...markdown content...
@@ -95,7 +95,7 @@ As this is geared more towards end-user documentation, most tags are silently ig
 
 ### Visibility
 
-For languages which declare property and method visibility, such as C++, Java and PHP, inline2md will automatically skip documentation for which the next line of code (anything before `{`) contains the `private` keyword.
+For languages which declare property and method visibility, such as C++, Java and PHP, inline2md will automatically skip documentation for which the next line of code (anything before `{` or `;`) contains the `private` keyword.
 
 Additionally, inline2md can also skip `protected` items if invoked with argument `--skip-protected`.  (See [Usage](#usage).)
 
