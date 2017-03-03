@@ -16,11 +16,6 @@ Unlike other software I could find, **inline2md does not generate any file**.  I
 - [MIT License](#mit-license)
 
 
-## UNDER CONSTRUCTION!
-
-I created this repo early in the writing process to benefit from GitHub's issues.  It is not completed nor available in NPM yet!
-
-
 ## Installation
 
 ```sh
