@@ -4,7 +4,7 @@
 
 var test = require('tape');
 
-var inline2md = require('./inline2md');
+var docblox2md = require('./docblox2md');
 
 test('Dummy placeholder', function(t) {
   t.plan(1);
