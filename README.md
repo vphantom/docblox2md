@@ -1,6 +1,6 @@
-# inline2md v0.0.1
+# inline2md
 
-[![license](https://img.shields.io/github/license/vphantom/php-email.svg?style=plastic)]()
+[![license](https://img.shields.io/github/license/vphantom/php-email.svg?style=plastic)]() [![GitHub release](https://img.shields.io/github/release/vphantom/inline2md.svg?style=plastic)]()
 
 Generate Markdown from doc-comments.
 
@@ -66,7 +66,7 @@ Simply run with a list of Markdown files to update.  For example:
 $ inline2md docs/*.md
 ```
 
-Every recognized comment in each Markdown file will be processed.  Any comment leading to a missing file or a file which doesn't parse properly will be emptied and errors will be displayed in the console.
+Every placeholder in each input file will be processed.  Any placeholder leading to a missing file or a file which doesn't parse properly will be emptied.
 
 To omit `protected` items (in language where this makes sense), specify `--skip-protected`:
 
@@ -77,14 +77,12 @@ $ inline2md --skip-protected docs/*.md
 
 ## Supported Languages
 
-This initial release supports `/** ... */` comment blocks and languages based on `{}` blocks.  This includes:
+This initial release supports `/** ... */` comment blocks and languages based on `{}` blocks and/or `;` statement delimiters.  This includes:
 
 * C++
 * Java
 * JavaScript
 * PHP
-
-Support for Perl, Python and Ruby is planned for a future release.
 
 ### JavaDoc-style Tags
 
@@ -97,10 +95,13 @@ As this is geared more towards end-user documentation, most tags are silently ig
 * `@prop[erty] [{]type[}] name [[-] description...]`
 * `@param[eter] [{]type[}] name [[-] description...]`
 * `@return[s] [{]type[}] [description...]`
+* `@ignore`
 
 Note that because we try to be language-agnostic, grouping tags like `@interface` require a name: the following line of code is not parsed for symbol names.
 
-When `@class`, `@module` or `@interface` is encountered, it is itself documented with a header at the level specified in your placeholder and the following items are at one level deeper.  Since code is not analyzed, those cannot be nested and any subsequent `@class`, `@module` or `@interface` will still be at the base level.  For similar reasons, even though PHPDoc doesn't require such tags, here they are necessary to recognize depth changes without analyzing code.
+When `@class`, `@module` or `@interface` is encountered, it is itself documented with a header at the level specified in your placeholder and the following items are at one level deeper.  Since code is not analyzed, those cannot be nested and any subsequent `@class`, `@module` or `@interface` will still be at the base level.  For similar reasons, even though PHPDoc doesn't require such tags, here they are necessary to recognize depth changes.
+
+As its name implies, the presence of `@ignore` hides a doc-comment.
 
 #### Non-Standard Tags
 
