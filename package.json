@@ -1,6 +1,6 @@
 {
   "name": "inline2md",
-  "version": "0.0.1",
+  "version": "0.6.0",
   "description": "Generate Markdown from doc-comments",
   "main": "inline2md.js",
   "bin": {

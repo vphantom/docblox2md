@@ -17,7 +17,6 @@ lint:
 test:
 	$(ISTANBUL) cover --print none --report lcov -x test.js test.js  |$(TAP)
 	$(ISTANBUL) report text-summary
-	node test/usage.js |$(TAP)
 
 .PHONY: help clean lint test travis
 
