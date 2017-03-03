@@ -1,6 +1,6 @@
 # docblox2md
 
-[![license](https://img.shields.io/github/license/vphantom/docblox2md.svg?style=plastic)]() [![GitHub release](https://img.shields.io/github/release/vphantom/docblox2md.svg?style=plastic)]()
+[![license](https://img.shields.io/github/license/vphantom/docblox2md.svg?style=plastic)]() [![GitHub release](https://img.shields.io/github/release/vphantom/docblox2md.svg?style=plastic)]() [![Build Status](https://travis-ci.org/vphantom/docblox2md.svg?branch=v0.6.0)](https://travis-ci.org/vphantom/docblox2md) [![Coverage Status](https://coveralls.io/repos/github/vphantom/docblox2md/badge.svg?branch=v0.6.0)](https://coveralls.io/github/vphantom/docblox2md?branch=v0.6.0)
 
 Generate Markdown from doc-comments.
 
