@@ -1,12 +1,12 @@
-# inline2md
+# docblox2md
 
-[![license](https://img.shields.io/github/license/vphantom/php-email.svg?style=plastic)]() [![GitHub release](https://img.shields.io/github/release/vphantom/inline2md.svg?style=plastic)]()
+[![license](https://img.shields.io/github/license/vphantom/docblox2md.svg?style=plastic)]() [![GitHub release](https://img.shields.io/github/release/vphantom/docblox2md.svg?style=plastic)]()
 
 Generate Markdown from doc-comments.
 
 Inserts/replaces API documentation derived from inline doc-comments into Markdown format, inside Markdown documents.  It **supports JavaDoc, JSDoc, PhpDoc** and is easily extensible to many more languages.
 
-Unlike other software I could find, **inline2md does not generate any file**.  It looks for placeholders in your existing (presumably Markdown) documents and edits them in place.  This suits my small projects much better than more complex documentation generators.
+Unlike other software I could find, **docblox2md does not generate any file**.  It looks for placeholders in your existing (presumably Markdown) documents and edits them in place.  This suits my small projects much better than more complex documentation generators.
 
 **Table of Contents**
 
@@ -19,7 +19,7 @@ Unlike other software I could find, **inline2md does not generate any file**.  I
 ## Installation
 
 ```sh
-$ npm install inline2md
+$ npm install docblox2md
 ```
 
 
@@ -29,7 +29,7 @@ This tool only modifies files, it does not generate any.  You are thus in full c
 
 ### Placeholders
 
-Anywhere you want to insert the documentation for a specific file, insert an HTML comment telling inline2md which file to process:
+Anywhere you want to insert the documentation for a specific file, insert an HTML comment telling docblox2md which file to process:
 
 ```md
 ...markdown content...
@@ -60,7 +60,7 @@ The above would title root-level comments with `###`, the next level with `####`
 Simply run with a list of Markdown files to update.  For example:
 
 ```sh
-$ inline2md docs/*.md
+$ docblox2md docs/*.md
 ```
 
 Every placeholder in each input file will be processed.  Any placeholder leading to a missing file or a file which doesn't parse properly will be emptied.
@@ -68,7 +68,7 @@ Every placeholder in each input file will be processed.  Any placeholder leading
 To omit `protected` items (in language where this makes sense), specify `--skip-protected`:
 
 ```sh
-$ inline2md --skip-protected docs/*.md
+$ docblox2md --skip-protected docs/*.md
 ```
 
 
@@ -102,18 +102,18 @@ As its name implies, the presence of `@ignore` hides a doc-comment.
 
 * `@endclass`, `@endmodule`, `@endinterface`
 
-If more documentation follows the contents of a group, and isn't a group itself, a lone docblock with one of the above tells inline2md to go back to its original header level.  This is _not_ necessary if what follows is another class, module or interface.
+If more documentation follows the contents of a group, and isn't a group itself, a lone docblock with one of the above tells docblox2md to go back to its original header level.  This is _not_ necessary if what follows is another class, module or interface.
 
 ### Visibility
 
-For languages which declare property and method visibility, such as C++, Java and PHP, inline2md will automatically skip documentation for which the next line of code (anything before `{` or `;`) contains the `private` keyword, or if documentation includes the `@private` tag.
+For languages which declare property and method visibility, such as C++, Java and PHP, docblox2md will automatically skip documentation for which the next line of code (anything before `{` or `;`) contains the `private` keyword, or if documentation includes the `@private` tag.
 
-Similarly, inline2md can also skip `@protected` items if invoked with argument `--skip-protected`.  (See [Usage](#usage).)
+Similarly, docblox2md can also skip `@protected` items if invoked with argument `--skip-protected`.  (See [Usage](#usage).)
 
 
 ## Future Development
 
-Inline2md is structured in three distinct sections:
+docblox2md is structured in three distinct sections:
 
 * The source parser — creates a basic AST with all documentation of a source file.
 * The Markdown generator — creates Markdown documentation from an AST.

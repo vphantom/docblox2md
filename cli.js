@@ -3,7 +3,7 @@
 'use strict';
 
 var fs = require('fs');
-var inline2md = require('./inline2md.js');
+var docblox2md = require('./docblox2md.js');
 var posixGetopt = require('posix-getopt');
 var parser;
 var option;
@@ -62,7 +62,7 @@ files.forEach(function(filename) {
   try {
     fs.writeFileSync(
       filename,
-      inline2md.filterDocument(file, options.threshold)
+      docblox2md.filterDocument(file, options.threshold)
     );
   } catch (e) {
     process.stderr.write(

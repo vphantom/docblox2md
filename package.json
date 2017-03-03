@@ -1,17 +1,17 @@
 {
-  "name": "inline2md",
+  "name": "docblox2md",
   "version": "0.6.0",
   "description": "Generate Markdown from doc-comments",
-  "main": "inline2md.js",
+  "main": "docblox2md.js",
   "bin": {
-    "inline2md": "./cli.js"
+    "docblox2md": "./cli.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vphantom/inline2md.git"
+    "url": "git+https://github.com/vphantom/docblox2md.git"
   },
   "author": "Stéphane Lavergne <lis@imars.com> (https://github.com/vphantom)",
   "license": "MIT",
@@ -19,12 +19,12 @@
     "LICENSE.txt",
     "README.md",
     "cli.js",
-    "inline2md.js"
+    "docblox2md.js"
   ],
   "bugs": {
-    "url": "https://github.com/vphantom/inline2md/issues"
+    "url": "https://github.com/vphantom/docblox2md/issues"
   },
-  "homepage": "https://github.com/vphantom/inline2md#readme",
+  "homepage": "https://github.com/vphantom/docblox2md#readme",
   "devDependencies": {
     "coveralls": "^2.11.16",
     "eslint": "^3.16.1",

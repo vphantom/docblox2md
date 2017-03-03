@@ -2,7 +2,7 @@ JSLINT     := node_modules/.bin/eslint --fix
 TAP        := node_modules/.bin/faucet
 ISTANBUL   := node_modules/.bin/istanbul
 
-JS_SRC := cli.js inline2md.js
+JS_SRC := cli.js docblox2md.js
 JS_ALL := $(JS_SRC) $(wildcard test/*.js)
 
 help:
