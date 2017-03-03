@@ -86,18 +86,49 @@ This initial release supports `/** ... */` comment blocks and languages based on
 
 Support for Perl, Python and Ruby is planned for a future release.
 
-### JavaDoc-style tags
+### JavaDoc-style Tags
 
 As this is geared more towards end-user documentation, most tags are silently ignored.  Recognized tags are:
 
-* `@param[eter] type name [[-] description...]`
-* `@return[s] type [description...]`
+* `@class [[{]type[}]] name`, `@module [[{]type[}]] name`, `@interface name`
+* `@implements [{]name[}]`
+* `@private`, `@protected`, `@public`
+* `@static`
+* `@prop[erty] [{]type[}] name [[-] description...]`
+* `@param[eter] [{]type[}] name [[-] description...]`
+* `@return[s] [{]type[}] [description...]`
+
+Note that because we try to be language-agnostic, grouping tags like `@interface` require a name: the following line of code is not parsed for symbol names.
+
+When `@class`, `@module` or `@interface` is encountered, it is itself documented with a header at the level specified in your placeholder and the following items are at one level deeper.  Since code is not analyzed, those cannot be nested and any subsequent `@class`, `@module` or `@interface` will still be at the base level.  For similar reasons, even though PHPDoc doesn't require such tags, here they are necessary to recognize depth changes without analyzing code.
+
+#### Non-Standard Tags
+
+* `@endclass`, `@endmodule`, `@endinterface`
+
+If more documentation follows the contents of a group, and isn't a group itself, a lone docblock with one of the above tells inline2md to go back to its original header level.  This is _not_ necessary if what follows is another class, module or interface.
 
 ### Visibility
 
-For languages which declare property and method visibility, such as C++, Java and PHP, inline2md will automatically skip documentation for which the next line of code (anything before `{` or `;`) contains the `private` keyword.
+For languages which declare property and method visibility, such as C++, Java and PHP, inline2md will automatically skip documentation for which the next line of code (anything before `{` or `;`) contains the `private` keyword, or if documentation includes the `@private` tag.
 
-Additionally, inline2md can also skip `protected` items if invoked with argument `--skip-protected`.  (See [Usage](#usage).)
+Similarly, inline2md can also skip `@protected` items if invoked with argument `--skip-protected`.  (See [Usage](#usage).)
+
+
+## Future Development
+
+Inline2md is structured in three distinct sections:
+
+* The source parser — creates a basic AST with all documentation of a source file.
+* The Markdown generator — creates Markdown documentation from an AST.
+* The document splicer — inserts/updates documentation sections between placeholders.
+
+So adding the following shouldn't be _too_ much of a pain:
+
+* NROFF/TROFF (man-page) output
+* Regular HTML output
+* Perl input (no tags, very loose formatting...)
+* Python input (might adhere to Doxygen tags to simplify this one)
 
 
 ## MIT License
