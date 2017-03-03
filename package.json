@@ -9,6 +9,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vphantom/inline2md.git"
+  },
   "author": "Stéphane Lavergne <lis@imars.com> (https://github.com/vphantom)",
   "license": "MIT",
   "files": [
@@ -17,11 +21,18 @@
     "cli.js",
     "inline2md.js"
   ],
+  "bugs": {
+    "url": "https://github.com/vphantom/inline2md/issues"
+  },
+  "homepage": "https://github.com/vphantom/inline2md#readme",
   "devDependencies": {
     "coveralls": "^2.11.16",
     "eslint": "^3.16.1",
     "faucet": "0.0.1",
     "istanbul": "^0.4.5",
     "tape": "^4.6.3"
+  },
+  "dependencies": {
+    "posix-getopt": "^1.2.0"
   }
 }

@@ -4,7 +4,9 @@
 
 Generate Markdown from doc-comments.
 
-Inserts/replaces API documentation derived from inline doc-comments into Markdown format.  While it is written in JavaScript, it supports JavaDoc, JSDoc, PhpDoc and is easily extensible to many more languages.
+Inserts/replaces API documentation derived from inline doc-comments into Markdown format, inside Markdown documents.  It **supports JavaDoc, JSDoc, PhpDoc** and is easily extensible to many more languages.
+
+Unlike other software I could find, **inline2md does not generate any file**.  It looks for placeholders in your existing (presumably Markdown) documents and edits them in place.  This suits my small projects much better than more complex documentation generators.
 
 **Table of Contents**
 
@@ -88,16 +90,14 @@ This initial release supports `/** ... */` comment blocks and languages based on
 
 As this is geared more towards end-user documentation, most tags are silently ignored.  Recognized tags are:
 
-* `@class [[{]type[}]] name`, `@module [[{]type[}]] name`, `@interface name`
-* `@implements [{]name[}]`
+* `@{class|module|interface} [type] name`
+* `@implements type`
 * `@private`, `@protected`, `@public`
-* `@static`
-* `@prop[erty] [{]type[}] name [[-] description...]`
-* `@param[eter] [{]type[}] name [[-] description...]`
-* `@return[s] [{]type[}] [description...]`
+* `@param[eter] type name [[-] description...]`
+* `@return[s] type [description...]`
 * `@ignore`
 
-Note that because we try to be language-agnostic, grouping tags like `@interface` require a name: the following line of code is not parsed for symbol names.
+Throughout, `type` may be of the form `{type}` as well.
 
 When `@class`, `@module` or `@interface` is encountered, it is itself documented with a header at the level specified in your placeholder and the following items are at one level deeper.  Since code is not analyzed, those cannot be nested and any subsequent `@class`, `@module` or `@interface` will still be at the base level.  For similar reasons, even though PHPDoc doesn't require such tags, here they are necessary to recognize depth changes.
 
