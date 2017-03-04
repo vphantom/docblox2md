@@ -31,8 +31,7 @@ var re = {
   // Note that it cannot handle nested comments (say in sample code, for
   // example).
   //
-  // srcSplit: /\/\*\*([^]*?)\*\/([^;{\/]+?)[;{]/,
-  srcSplit: /(?:\/\*\*[^]*?\*\/\s*)?\/\*\*([^]*?)\*\/([^;{\/]+?)[;{]/,
+  srcSplit: /(?:\/\*\*[^]*?\*\/\s*)?\/\*\*([^]*?)\*\/([^;{]+?)[;{]/,
 
   // lineSplit - Get clean lines from doc comment
   //
