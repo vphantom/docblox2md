@@ -276,18 +276,26 @@ function blocksToMarkdown(blocks, level, threshold) {
       '#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0))
       + ' `'
       + (visibility ? visibility + ' ' : '')
-      + (type ? type + ' ' : '')
-      + (name ? name + ' ' : '')
+      // + (type ? type + ' ' : '')
+      // + (name ? name + ' ' : '')
       + (implem ? 'implements ' + implem + ' ' : '')
       + blocks[i].code + '`\n\n'
     );
 
     // Verbatim lines
-    md.push(blocks[i].lines.join('\n'));
+    for (j = 0; j < blocks[i].lines.length; j++) {
+      if (blocks[i].lines[j] === '') {
+        md.push('\n\n');
+      } else if (blocks[i].lines[j].match(/^\s/)) {
+        md.push(blocks[i].lines[j] + '\n');
+      } else {
+        md.push(blocks[i].lines[j] + ' ');
+      }
+    }
 
     // Parameters
     if (params.length > 0) {
-      md.push('\n');
+      md.push('\n**Parameters:**\n\n');
     }
     for (j = 0; j < params.length; j++) {
       md.push(
