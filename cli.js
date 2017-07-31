@@ -17,7 +17,7 @@ var options = {
 // Parse command line arguments
 //
 parser = new posixGetopt.BasicParser(
-  'h(help)v(verbose)p(skip-protected)',
+  'h(help)v(verbose)p(skip-protected)i(include-private)',
   process.argv
 );
 while ((option = parser.getopt()) !== undefined) {
@@ -33,6 +33,9 @@ while ((option = parser.getopt()) !== undefined) {
       break;
     case 'p':
       options.threshold = 0;
+      break;
+    case 'i':
+      options.threshold = 2;
       break;
     default:
       // posix-getopt already emitted a message

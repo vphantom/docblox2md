@@ -243,6 +243,27 @@ function blocksToMarkdown(blocks, level, threshold) {
           visibility = tag.tag;
           break;
 
+        case 'access':
+          switch (tag.line) {
+            case 'public':
+              visibility = tag.line;
+              break;
+            case 'protected':
+              if (threshold < 1) {
+                continue nextBlock;
+              }
+              visibility = tag.line;
+              break;
+            case 'private':
+              if (threshold < 2) {
+                continue nextBlock;
+              }
+              visibility = tag.line;
+              break;
+            default:
+          }
+          break;
+
         case 'param':
         case 'parameter':
           tagArgs = tag.line.match(re.tagTypeNameDesc);
@@ -275,7 +296,7 @@ function blocksToMarkdown(blocks, level, threshold) {
     md.push(
       '#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0))
       + ' `'
-      + (visibility ? visibility + ' ' : '')
+      // + (visibility ? visibility + ' ' : '')
       // + (type ? type + ' ' : '')
       // + (name ? name + ' ' : '')
       + (implem ? 'implements ' + implem + ' ' : '')

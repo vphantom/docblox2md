@@ -65,10 +65,16 @@ $ docblox2md docs/*.md
 
 Every placeholder in each input file will be processed.  Any placeholder leading to a missing file or a file which doesn't parse properly will be emptied.
 
-To omit `protected` items (in language where this makes sense), specify `--skip-protected`:
+To omit `protected` in addition to items (in language where this makes sense), specify `--skip-protected`:
 
 ```sh
 $ docblox2md --skip-protected docs/*.md
+```
+
+Conversely, to include `private` items in addition to `public` and `protected` ones, specify `--include-private`:
+
+```sh
+$ docblox2md --include-private docs/*.md
 ```
 
 
@@ -80,6 +86,12 @@ This initial release supports `/** ... */` comment blocks and languages based on
 * Java
 * JavaScript
 * PHP
+
+### phpDocumentor-style Tags
+
+Recognized additional tags are:
+
+* `@access private|protected|public`
 
 ### JavaDoc-style Tags
 
