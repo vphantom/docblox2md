@@ -288,7 +288,8 @@ function blocksToMarkdown(blocks, level, threshold) {
 
     // Header
     md.push(
-      '#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0))
+				'\n'
+				+ '#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0))
 				+ ' `'
 				// + (visibility ? visibility + ' ' : '')
 				// + (type ? type + ' ' : '')
