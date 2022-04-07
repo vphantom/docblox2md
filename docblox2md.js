@@ -144,7 +144,10 @@ function srcToBlocks(src) {
     i++;
     if (i < chunks.length) {
       // Third of triplet: code
-      block.code = chunks[i].trim().replace(/\s+/g, ' ');
+      let code = chunks[i].trim().replace(/\s+/g, ' ');
+      let variable = code.match(/^((var|let|const)\s+[^=\s]+)\s*=/);
+
+      block.code = (variable && variable[1]) ? variable[1] : code;
     }
 
     if (block.lines.length > 0 || block.tags.length > 0) {
