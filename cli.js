@@ -11,7 +11,7 @@ var files;
 var verbose = false;
 var fatalErrors = false;
 var options = {
-  threshold: 1
+  threshold: 1,
 };
 
 // Parse command line arguments

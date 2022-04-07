@@ -4,7 +4,6 @@ var fs = require('fs');
 
 /* eslint-disable max-len */
 var re = {
-
   // Document level
 
   // mdSplit - Split Markdown by doc-comment placeholders
@@ -16,7 +15,6 @@ var re = {
   // The very last instance may end on raw Markdown without 2 and 3.
   //
   mdSplit: /<!--\s+BEGIN\s+DOC-COMMENT\s+(?:H([123456])\s+)?(\S+)\s+-->[^]*?<!--\s+END\s+DOC-COMMENT\s+-->/i,
-
 
   // Source parsing level
 
@@ -51,7 +49,6 @@ var re = {
   //
   tag: /^\s*@(\S+)\s*(.*)$/,
 
-
   // Tag parsing level
 
   // tagType
@@ -79,9 +76,7 @@ var re = {
   // 3. Name
   // 4. Description (Optional)
   //
-  tagTypeNameDesc: /^\{?([^\s}]+)\}?\s+([^-]\S*)(?:\s+-)?(?:\s+(.*))?$/
-
-
+  tagTypeNameDesc: /^\{?([^\s}]+)\}?\s+([^-]\S*)(?:\s+-)?(?:\s+(.*))?$/,
 };
 /* eslint-enable max-len */
 
@@ -111,7 +106,7 @@ function srcToBlocks(src) {
     let block = {
       lines: [],
       tags : [],
-      code : ''
+      code : '',
     };
     let hasTag = false;
 
@@ -140,7 +135,7 @@ function srcToBlocks(src) {
         hasTag = true;
         block.tags.push({
           tag : tag[1],
-          line: tag[2]
+          line: tag[2],
         });
       }
     }
@@ -201,7 +196,6 @@ function blocksToMarkdown(blocks, level, threshold) {
       let tag = blocks[i].tags[j];
 
       switch (tag.tag) {
-
         case 'class':
         case 'module':
         case 'interface':
@@ -269,9 +263,9 @@ function blocksToMarkdown(blocks, level, threshold) {
           tagArgs = tag.line.match(re.tagTypeNameDesc);
           if (tagArgs !== null) {
             params.push({
-              type: (tagArgs[1] || ''),
-              name: (tagArgs[2] || ''),
-              desc: (tagArgs[3] || '')
+              type: tagArgs[1] || '',
+              name: tagArgs[2] || '',
+              desc: tagArgs[3] || '',
             });
           }
           break;
@@ -295,12 +289,13 @@ function blocksToMarkdown(blocks, level, threshold) {
     // Header
     md.push(
       '#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0))
-      + ' `'
-      // + (visibility ? visibility + ' ' : '')
-      // + (type ? type + ' ' : '')
-      // + (name ? name + ' ' : '')
-      + (implem ? 'implements ' + implem + ' ' : '')
-      + blocks[i].code + '`\n\n'
+				+ ' `'
+				// + (visibility ? visibility + ' ' : '')
+				// + (type ? type + ' ' : '')
+				// + (name ? name + ' ' : '')
+				+ (implem ? 'implements ' + implem + ' ' : '')
+				+ blocks[i].code
+				+ '`\n\n'
     );
 
     // Verbatim lines
@@ -321,11 +316,11 @@ function blocksToMarkdown(blocks, level, threshold) {
     for (j = 0; j < params.length; j++) {
       md.push(
         '* `'
-        + params[j].name
-        + '` — '
-        + params[j].type
-        + (params[j].desc ? ' — ' + params[j].desc : '')
-        + '\n'
+					+ params[j].name
+					+ '` — '
+					+ params[j].type
+					+ (params[j].desc ? ' — ' + params[j].desc : '')
+					+ '\n'
       );
     }
 
@@ -336,11 +331,7 @@ function blocksToMarkdown(blocks, level, threshold) {
         md.push(' `' + returnType + '`');
       }
       if (returnDesc !== '') {
-        md.push(
-          (returnType !== '' ? ' — ' : ' ')
-          + returnDesc
-          + '\n'
-        );
+        md.push((returnType !== '' ? ' — ' : ' ') + returnDesc + '\n');
       }
     }
 
@@ -461,5 +452,5 @@ module.exports = {
   srcToMarkdown   : srcToMarkdown,
 
   // End-to-end processing
-  filterDocument: filterDocument
+  filterDocument: filterDocument,
 };
