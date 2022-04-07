@@ -317,8 +317,9 @@ function blocksToMarkdown(blocks, level, threshold) {
       md.push(
         '* `'
 					+ params[j].name
-					+ '` — '
+					+ '` — `'
 					+ params[j].type
+					+ '`'
 					+ (params[j].desc ? ' — ' + params[j].desc : '')
 					+ '\n'
       );
