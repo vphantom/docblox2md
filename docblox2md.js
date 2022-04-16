@@ -344,7 +344,8 @@ function blocksToMarkdown(blocks, level, threshold) {
     md.push('\n');
   }
 
-  return md.join('');
+  return md.join('').replace(/(\n\n\n+)/g, '\n\n')
+		.replace(/([ \t]+$)/mg, '');
 }
 
 /**
