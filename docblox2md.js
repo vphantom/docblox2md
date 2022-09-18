@@ -2,6 +2,17 @@
 
 var fs = require('fs');
 
+// load a config for rendering replacemnts
+const path = require('path')
+const customconfig = path.join(__dirname, './docblox2md_config_custom.js')
+
+if(fs.existsSync(customconfig)){
+  var _aRender=require('./docblox2md_config_custom.js');
+} else {
+  var _aRender=require('./docblox2md_config.js');
+}
+// /load config
+
 /* eslint-disable max-len */
 var re = {
   // Document level
@@ -158,6 +169,26 @@ function srcToBlocks(src) {
   return blocks;
 }
 
+// https://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format?page=2&tab=scoredesc#tab-top
+function _sprintf(message){
+  const regexp = RegExp('%s','g');
+  let match;
+  let index = 1;
+  while((match = regexp.exec(message)) !== null) {
+      let replacement = arguments[index];
+      if (replacement) {
+          let messageToArray = message.split('');
+          messageToArray.splice(match.index, regexp.lastIndex - match.index, replacement);
+          message = messageToArray.join('');
+          index++;
+      } else {
+          break;
+      }
+  }
+
+  return message;
+}
+
 /**
  * Generate Markdown from abstract blocks
  *
@@ -291,16 +322,17 @@ function blocksToMarkdown(blocks, level, threshold) {
 
     // Header
     md.push(
-				'\n'
-				+ '#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0))
-				+ ' `'
-				// + (visibility ? visibility + ' ' : '')
-				// + (type ? type + ' ' : '')
-				// + (name ? name + ' ' : '')
-				+ (implem ? 'implements ' + implem + ' ' : '')
-				+ blocks[i].code
-				+ '`\n\n'
-    );
+      _sprintf(
+        _aRender.header.item, 
+				'#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0))
+          + ' '
+          // + (visibility ? visibility + ' ' : '')
+          // + (type ? type + ' ' : '')
+          // + (name ? name + ' ' : '')
+          + (implem ? 'implements ' + implem + ' ' : '')
+          + blocks[i].code
+      )
+    )
 
     // Verbatim lines
     for (j = 0; j < blocks[i].lines.length; j++) {
@@ -315,29 +347,29 @@ function blocksToMarkdown(blocks, level, threshold) {
 
     // Parameters
     if (params.length > 0) {
-      md.push('\n**Parameters:**\n\n');
+      md.push(_aRender.params.pre)
     }
     for (j = 0; j < params.length; j++) {
       md.push(
-        '* `'
-					+ params[j].name
-					+ '` — `'
-					+ params[j].type
-					+ '`'
-					+ (params[j].desc ? ' — ' + params[j].desc : '')
-					+ '\n'
-      );
+        _sprintf(
+          _aRender.params.item, 
+          params[j].name, 
+          params[j].type,
+          (params[j].desc ? params[j].desc : '')
+        )
+      )
     }
 
     // Return value
     if (returnType !== '' || returnDesc !== '') {
-      md.push('\n**Returns:**');
-      if (returnType !== '') {
-        md.push(' `' + returnType + '`');
-      }
-      if (returnDesc !== '') {
-        md.push((returnType !== '' ? ' — ' : ' ') + returnDesc + '\n');
-      }
+      md.push(_aRender.return.pre)
+      md.push(
+        _sprintf(
+          _aRender.return.item,
+          returnType+' ',
+          returnDesc+' '
+          )
+      )
     }
 
     // Final empty line
