@@ -14,6 +14,45 @@ var options = {
   threshold: 1,
 };
 
+var usage='\n\
+DOCBLOX2MD - Generate Markdown from doc-comments\n\
+\n\
+license: MIT license \n\
+author:  Stéphane Lavergne\n\
+source:  https://github.com/vphantom/docblox2md \n\
+\n\
+\n\
+Inserts/replaces API documentation derived from inline doc-comments into \n\
+Markdown format, inside Markdown documents. \n\
+\n\
+It supports JavaDoc, JSDoc, PhpDoc and is easily extensible to many more \n\
+languages.\n\
+\n\
+Unlike other software I could find, docblox2md does not generate any file. It\n\
+looks for placeholders in your existing (presumably Markdown) documents and\n\
+edits them in place. This suits my small projects much better than more\n\
+complex documentation generators.\n\
+\n\
+\n\
+SYNTAX:\n\
+  docblox2md [OPIONS] FILE [FILE2 [.. FILE_N]]\n\
+\n\
+OPTIONS:\n\
+  -h | show this help\n\
+  -i | public, protected and private\n\
+  -p | public only\n\
+  -v | verbose: show processed file\n\
+\n\
+  By default (without -i or -p) it will render public and protected items.\n\
+\n\
+PARAMETER:\n\
+  FILE(s)  {string}  markdown file; read as utf-8\n\
+\n\
+EXAMPLE:\n\
+  docblox2md -v *.md\n\
+\n\
+'
+
 // Parse command line arguments
 //
 parser = new posixGetopt.BasicParser(
@@ -25,7 +64,7 @@ while ((option = parser.getopt()) !== undefined) {
   // option.optarg: the argument (if option needs one)
   switch (option.option) {
     case 'h':
-      process.stderr.write('TODO: HELP NOT IMPLEMENTED\n');
+      process.stderr.write(usage);
       process.exit(0);
       break;
     case 'v':
