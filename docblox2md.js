@@ -2,16 +2,41 @@
 
 var fs = require('fs');
 
+var _aRender={
+  'header': {
+    'pre': '',
+    'item': "`%s`\n",
+    'post': ''
+  },
+  'params': {
+    'pre': '\n**Parameters:**\n\n',
+    'item': "* `%s` — `%s` — %s\n", // varname, type, description
+    'post': '\n'
+  },
+  'return': {
+    'pre': '\n**Return:**\n\n',
+    'item': "%s %s\n",
+    'post': ''
+  }
+}
+
 // load a config for rendering replacemnts
 const path = require('path')
-const customconfig = path.join(__dirname, './docblox2md_config_custom.js')
 
-if(fs.existsSync(customconfig)){
-  var _aRender=require('./docblox2md_config_custom.js');
-} else {
-  var _aRender=require('./docblox2md_config.js');
+// list of optional custom config files to read ... 1st match wins
+const aCfgfiles=[
+  process.cwd()+'/.docblox2md.js',                  // in working directory
+  path.join(process.env.HOME, '/.docblox2md.js'),   // in $HOME
+  path.join(__dirname, '/.docblox2md.js'),          // in install dir
+];
+
+for (var i=0; i<aCfgfiles.length; i++){
+  if (fs.existsSync(aCfgfiles[i])) {
+    process.stderr.write('Info: Unsing custom config '+aCfgfiles[i]+'...\n');
+    var _aRender=require(aCfgfiles[i]);
+    break;
+  }
 }
-// /load config
 
 /* eslint-disable max-len */
 var re = {
@@ -353,16 +378,18 @@ function blocksToMarkdown(blocks, level, threshold) {
     // Parameters
     if (params.length > 0) {
       md.push(_aRender.params.pre)
-    }
-    for (j = 0; j < params.length; j++) {
-      md.push(
-        _sprintf(
-          _aRender.params.item, 
-          params[j].name, 
-          params[j].type,
-          (params[j].desc ? params[j].desc : '')
+    
+      for (j = 0; j < params.length; j++) {
+        md.push(
+          _sprintf(
+            _aRender.params.item, 
+            params[j].name, 
+            params[j].type,
+            (params[j].desc ? params[j].desc : '')
+          )
         )
-      )
+      }
+      md.push(_aRender.params.post)
     }
 
     // Return value
