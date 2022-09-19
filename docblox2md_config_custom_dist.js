@@ -7,10 +7,10 @@
  * Then your settings overide data from docblox2md_config.js
  */
 
-module.exports = {
+ module.exports = {
     'header': {
-        'pre': '',
-        'item': "\n%s\n\n",
+        'pre': '\n---\n',
+        'item': "`%s`",
         'post': ''
     },
     'params': {

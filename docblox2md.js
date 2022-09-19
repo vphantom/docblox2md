@@ -322,17 +322,22 @@ function blocksToMarkdown(blocks, level, threshold) {
 
     // Header
     md.push(
-      _sprintf(
+      ''
+      + (_aRender.header.pre ? _aRender.header.pre : '') 
+      + '#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0))
+      + ' '
+      +_sprintf(
         _aRender.header.item, 
-				'#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0))
-          + ' '
+          ''
           // + (visibility ? visibility + ' ' : '')
           // + (type ? type + ' ' : '')
           // + (name ? name + ' ' : '')
           + (implem ? 'implements ' + implem + ' ' : '')
-          + blocks[i].code
+          + blocks[i].code.replace(/\$/, "\\$")
       )
+      + (_aRender.header.post ? _aRender.header.post : '') 
     )
+    md.push('\n');
 
     // Verbatim lines
     for (j = 0; j < blocks[i].lines.length; j++) {
@@ -369,7 +374,8 @@ function blocksToMarkdown(blocks, level, threshold) {
           returnType+' ',
           returnDesc+' '
           )
-      )
+      ),
+      md.push(_aRender.return.post)
     }
 
     // Final empty line
