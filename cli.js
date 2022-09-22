@@ -49,7 +49,11 @@ files = process.argv.slice(parser.optind());
 files.forEach(function(filename) {
   var file;
 
-  if (verbose) {process.stderr.write('Processing ' + filename + '...\n');}
+  if (verbose) {
+    process.stderr.write(
+      'Processing ' + filename + '...\n'
+    );
+  }
 
   try {
     file = fs.readFileSync(filename, {encoding: 'utf-8'});
@@ -63,10 +67,18 @@ files.forEach(function(filename) {
   try {
     var newdata=docblox2md.filterDocument(file, options.threshold);
     if(file===newdata){
-      if (verbose) {process.stderr.write('SKIP: ' + filename + ' has no changes\n');}
+      if (verbose) {
+        process.stderr.write(
+          'SKIP: ' + filename + ' has no changes\n'
+          );
+        }
     } else {
       fs.writeFileSync(filename,newdata);
-      if (verbose) {process.stderr.write('OK: '+filename + ' was written\n');}
+      if (verbose) {
+        process.stderr.write(
+          'OK: '+filename + ' was written\n'
+        );
+      }
     }
   } catch (e) {
     process.stderr.write(

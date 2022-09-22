@@ -33,7 +33,9 @@ const aCfgfiles=[
 
 for (var i=0; i<aCfgfiles.length; i++){
   if (fs.existsSync(aCfgfiles[i])) {
-    process.stderr.write('Info: Using custom config '+aCfgfiles[i]+'...\n');
+    process.stderr.write(
+      'Info: Using custom config '+aCfgfiles[i]+'...\n'
+    );
     var config=require(aCfgfiles[i]);
     break;
   }
