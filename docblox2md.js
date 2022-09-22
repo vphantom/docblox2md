@@ -1,27 +1,28 @@
 'use strict';
 
 var fs = require('fs');
+const path = require('path')
 
-var _aRender={
-  'header': {
-    'pre': '',
-    'item': "`%s`\n",
-    'post': ''
-  },
-  'params': {
-    'pre': '\n**Parameters:**\n\n',
-    'item': "* `%s` — `%s` — %s\n", // varname, type, description
-    'post': '\n'
-  },
-  'return': {
-    'pre': '\n**Return:**\n\n',
-    'item': "%s %s\n",
-    'post': ''
+// default config data
+var config={
+  'output': {
+    'header': {
+      'pre': '',
+      'item': "`%s`\n",
+      'post': ''
+    },
+    'params': {
+      'pre': '\n**Parameters:**\n\n',
+      'item': "* `%s` — `%s` — %s\n", // varname, type, description
+      'post': '\n'
+    },
+    'return': {
+      'pre': '\n**Return:**\n\n',
+      'item': "%s %s\n",
+      'post': ''
+    }
   }
 }
-
-// load a config for rendering replacemnts
-const path = require('path')
 
 // list of optional custom config files to read ... 1st match wins
 const aCfgfiles=[
@@ -32,8 +33,8 @@ const aCfgfiles=[
 
 for (var i=0; i<aCfgfiles.length; i++){
   if (fs.existsSync(aCfgfiles[i])) {
-    process.stderr.write('Info: Unsing custom config '+aCfgfiles[i]+'...\n');
-    var _aRender=require(aCfgfiles[i]);
+    process.stderr.write('Info: Using custom config '+aCfgfiles[i]+'...\n');
+    var config=require(aCfgfiles[i]);
     break;
   }
 }
@@ -348,11 +349,11 @@ function blocksToMarkdown(blocks, level, threshold) {
     // Header
     md.push(
       ''
-      + (_aRender.header.pre ? _aRender.header.pre : '') 
+      + (config.output.header.pre ? config.output.header.pre : '') 
       + '#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0))
       + ' '
       +_sprintf(
-        _aRender.header.item, 
+        config.output.header.item, 
           ''
           // + (visibility ? visibility + ' ' : '')
           // + (type ? type + ' ' : '')
@@ -360,7 +361,7 @@ function blocksToMarkdown(blocks, level, threshold) {
           + (implem ? 'implements ' + implem + ' ' : '')
           + blocks[i].code.replace(/\$/, "\\$")
       )
-      + (_aRender.header.post ? _aRender.header.post : '') 
+      + (config.output.header.post ? config.output.header.post : '') 
     )
     md.push('\n');
 
@@ -377,32 +378,32 @@ function blocksToMarkdown(blocks, level, threshold) {
 
     // Parameters
     if (params.length > 0) {
-      md.push(_aRender.params.pre)
+      md.push(config.output.params.pre)
     
       for (j = 0; j < params.length; j++) {
         md.push(
           _sprintf(
-            _aRender.params.item, 
+            config.output.params.item, 
             params[j].name, 
             params[j].type,
             (params[j].desc ? params[j].desc : '')
           )
         )
       }
-      md.push(_aRender.params.post)
+      md.push(config.output.params.post)
     }
 
     // Return value
     if (returnType !== '' || returnDesc !== '') {
-      md.push(_aRender.return.pre)
+      md.push(config.output.return.pre)
       md.push(
         _sprintf(
-          _aRender.return.item,
+          config.output.return.item,
           returnType+' ',
           returnDesc+' '
           )
       ),
-      md.push(_aRender.return.post)
+      md.push(config.output.return.post)
     }
 
     // Final empty line
