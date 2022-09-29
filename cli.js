@@ -50,9 +50,7 @@ files.forEach(function(filename) {
   var file;
 
   if (verbose) {
-    process.stderr.write(
-      'Processing ' + filename + '...\n'
-    );
+    process.stderr.write('Info: Processing ' + filename + '...\n');
   }
 
   try {
@@ -65,19 +63,15 @@ files.forEach(function(filename) {
   }
 
   try {
-    var newdata=docblox2md.filterDocument(file, options.threshold);
-    if(file===newdata){
+    if(!docblox2md.hasPlaceholder(file)){
       if (verbose) {
-        process.stderr.write(
-          'SKIP: ' + filename + ' has no changes\n'
-          );
-        }
+        process.stderr.write('Skip: ' + filename + ' has no docblox2md placeholder.\n');
+      }
     } else {
+      var newdata=docblox2md.filterDocument(file, options.threshold);
       fs.writeFileSync(filename,newdata);
       if (verbose) {
-        process.stderr.write(
-          'OK: '+filename + ' was written\n'
-        );
+        process.stderr.write('OK: '+filename + ' was written\n');
       }
     }
   } catch (e) {

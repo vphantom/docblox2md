@@ -33,9 +33,7 @@ const aCfgfiles=[
 
 for (var i=0; i<aCfgfiles.length; i++){
   if (fs.existsSync(aCfgfiles[i])) {
-    process.stderr.write(
-      'Info: Using custom config '+aCfgfiles[i]+'...\n'
-    );
+    process.stderr.write('Info: Using custom config '+aCfgfiles[i]+'...\n');
     var config=require(aCfgfiles[i]);
     break;
   }
@@ -197,7 +195,15 @@ function srcToBlocks(src) {
   return blocks;
 }
 
-// https://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format?page=2&tab=scoredesc#tab-top
+/**
+ * sprintf implementation
+ * 
+ * source:
+ * https://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format?page=2&tab=scoredesc#tab-top
+ * 
+ * @param {String} message string with %s as placeholder
+ * @returns {String}
+ */
 function _sprintf(message){
   const regexp = RegExp('%s','g');
   let match;
@@ -471,6 +477,17 @@ function loadFile(filename, level, threshold) {
 }
 
 /**
+ * Check Markdown document for our placeholders
+ *
+ * @param {String} doc Input document
+ *
+ * @return {Boolean}
+ */
+function hasPlaceholder(doc) {
+  return doc.split(re.mdSplit).length > 1;
+}
+
+/**
  * Filter Markdown document for our placeholders
  *
  * Visibility threshold can be:
@@ -524,6 +541,8 @@ module.exports = {
   srcToBlocks     : srcToBlocks,
   blocksToMarkdown: blocksToMarkdown,
   srcToMarkdown   : srcToMarkdown,
+
+  hasPlaceholder  : hasPlaceholder,
 
   // End-to-end processing
   filterDocument: filterDocument,
