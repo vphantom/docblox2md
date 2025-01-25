@@ -89,7 +89,7 @@ files.forEach(function(filename) {
   var file;
 
   if (verbose) {
-    process.stderr.write('Processing ' + filename + '...\n');
+    process.stderr.write('Info: Processing ' + filename + '...\n');
   }
 
   try {
@@ -102,10 +102,17 @@ files.forEach(function(filename) {
   }
 
   try {
-    fs.writeFileSync(
-      filename,
-      docblox2md.filterDocument(file, options.threshold)
-    );
+    if(!docblox2md.hasPlaceholder(file)){
+      if (verbose) {
+        process.stderr.write('Skip: ' + filename + ' has no docblox2md placeholder.\n');
+      }
+    } else {
+      var newdata=docblox2md.filterDocument(file, options.threshold);
+      fs.writeFileSync(filename,newdata);
+      if (verbose) {
+        process.stderr.write('OK: '+filename + ' was written\n');
+      }
+    }
   } catch (e) {
     process.stderr.write(
       'Error: unable to write to ' + filename + ':' + e + '\n'

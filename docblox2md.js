@@ -1,6 +1,43 @@
 'use strict';
 
 var fs = require('fs');
+const path = require('path')
+
+// default config data
+var config={
+  'output': {
+    'header': {
+      'pre': '',
+      'item': "`%s`\n",
+      'post': ''
+    },
+    'params': {
+      'pre': '\n**Parameters:**\n\n',
+      'item': "* `%s` — `%s` — %s\n", // varname, type, description
+      'post': '\n'
+    },
+    'return': {
+      'pre': '\n**Return:**\n\n',
+      'item': "%s %s\n",
+      'post': ''
+    }
+  }
+}
+
+// list of optional custom config files to read ... 1st match wins
+const aCfgfiles=[
+  process.cwd()+'/.docblox2md.js',                  // in working directory
+  path.join(process.env.HOME, '/.docblox2md.js'),   // in $HOME
+  path.join(__dirname, '/.docblox2md.js'),          // in install dir
+];
+
+for (var i=0; i<aCfgfiles.length; i++){
+  if (fs.existsSync(aCfgfiles[i])) {
+    process.stderr.write('Info: Using custom config '+aCfgfiles[i]+'...\n');
+    var config=require(aCfgfiles[i]);
+    break;
+  }
+}
 
 /* eslint-disable max-len */
 var re = {
@@ -159,6 +196,34 @@ function srcToBlocks(src) {
 }
 
 /**
+ * sprintf implementation
+ * 
+ * source:
+ * https://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format?page=2&tab=scoredesc#tab-top
+ * 
+ * @param {String} message string with %s as placeholder
+ * @returns {String}
+ */
+function _sprintf(message){
+  const regexp = RegExp('%s','g');
+  let match;
+  let index = 1;
+  while((match = regexp.exec(message)) !== null) {
+      let replacement = arguments[index];
+      if (replacement) {
+          let messageToArray = message.split('');
+          messageToArray.splice(match.index, regexp.lastIndex - match.index, replacement);
+          message = messageToArray.join('');
+          index++;
+      } else {
+          break;
+      }
+  }
+
+  return message;
+}
+
+/**
  * Generate Markdown from abstract blocks
  *
  * Visibility threshold can be:
@@ -291,16 +356,22 @@ function blocksToMarkdown(blocks, level, threshold) {
 
     // Header
     md.push(
-				'\n'
-				+ '#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0))
-				+ ' `'
-				// + (visibility ? visibility + ' ' : '')
-				// + (type ? type + ' ' : '')
-				// + (name ? name + ' ' : '')
-				+ (implem ? 'implements ' + implem + ' ' : '')
-				+ blocks[i].code
-				+ '`\n\n'
-    );
+      ''
+      + (config.output.header.pre ? config.output.header.pre : '') 
+      + '#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0))
+      + ' '
+      +_sprintf(
+        config.output.header.item, 
+          ''
+          // + (visibility ? visibility + ' ' : '')
+          // + (type ? type + ' ' : '')
+          // + (name ? name + ' ' : '')
+          + (implem ? 'implements ' + implem + ' ' : '')
+          + blocks[i].code.replace(/\$/, "\\$")
+      )
+      + (config.output.header.post ? config.output.header.post : '') 
+    )
+    md.push('\n');
 
     // Verbatim lines
     for (j = 0; j < blocks[i].lines.length; j++) {
@@ -315,29 +386,32 @@ function blocksToMarkdown(blocks, level, threshold) {
 
     // Parameters
     if (params.length > 0) {
-      md.push('\n**Parameters:**\n\n');
-    }
-    for (j = 0; j < params.length; j++) {
-      md.push(
-        '* `'
-					+ params[j].name
-					+ '` — `'
-					+ params[j].type
-					+ '`'
-					+ (params[j].desc ? ' — ' + params[j].desc : '')
-					+ '\n'
-      );
+      md.push(config.output.params.pre)
+    
+      for (j = 0; j < params.length; j++) {
+        md.push(
+          _sprintf(
+            config.output.params.item, 
+            params[j].name, 
+            params[j].type,
+            (params[j].desc ? params[j].desc : '')
+          )
+        )
+      }
+      md.push(config.output.params.post)
     }
 
     // Return value
     if (returnType !== '' || returnDesc !== '') {
-      md.push('\n**Returns:**');
-      if (returnType !== '') {
-        md.push(' `' + returnType + '`');
-      }
-      if (returnDesc !== '') {
-        md.push((returnType !== '' ? ' — ' : ' ') + returnDesc + '\n');
-      }
+      md.push(config.output.return.pre)
+      md.push(
+        _sprintf(
+          config.output.return.item,
+          returnType+' ',
+          returnDesc+' '
+          )
+      ),
+      md.push(config.output.return.post)
     }
 
     // Final empty line
@@ -404,6 +478,17 @@ function loadFile(filename, level, threshold) {
 }
 
 /**
+ * Check Markdown document for our placeholders
+ *
+ * @param {String} doc Input document
+ *
+ * @return {Boolean}
+ */
+function hasPlaceholder(doc) {
+  return doc.split(re.mdSplit).length > 1;
+}
+
+/**
  * Filter Markdown document for our placeholders
  *
  * Visibility threshold can be:
@@ -457,6 +542,8 @@ module.exports = {
   srcToBlocks     : srcToBlocks,
   blocksToMarkdown: blocksToMarkdown,
   srcToMarkdown   : srcToMarkdown,
+
+  hasPlaceholder  : hasPlaceholder,
 
   // End-to-end processing
   filterDocument: filterDocument,
