@@ -77,6 +77,37 @@ Conversely, to include `private` items in addition to `public` and `protected` o
 $ docblox2md --include-private docs/*.md
 ```
 
+### Advanced Configuration
+
+The output style may be customized with an optional configuration file in the following locations (first match wins):
+
+1. `.docblox2md.js` in the current working directory
+2. `.docblox2md.js` in your home directory (`$HOME/.docblox2md.js`)
+3. `.docblox2md.js` in the docblox2md installation directory
+
+Here's an example configuration file that shows the default settings:
+
+```javascript
+module.exports = {
+  'output': {
+    'header': {
+      'pre': '',
+      'item': "`%s`\n",
+      'post': ''
+    },
+    'params': {
+      'pre': '\n**Parameters:**\n\n',
+      'item': "* `%s` — `%s` — %s\n", // varname, type, description
+      'post': '\n'
+    },
+    'return': {
+      'pre': '\n**Return:**\n\n',
+      'item': "%s %s\n",
+      'post': ''
+    }
+  }
+}
+```
 
 ## Supported Languages
 
