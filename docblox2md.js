@@ -389,6 +389,7 @@ function loadFile(filename, level, threshold) {
   var file;
 
   out.push('<!-- BEGIN DOC-COMMENT H' + level + ' ' + filename + ' -->\n');
+  out.push('<!-- AUTOMATICALLY GENERATED, DO NOT EDIT -->\n');
 
   try {
     file = fs.readFileSync(filename, {encoding: 'utf-8'});
