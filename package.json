@@ -1,6 +1,6 @@
 {
   "name": "docblox2md",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "description": "Generate Markdown from doc-comments",
   "main": "docblox2md.js",
   "bin": {
