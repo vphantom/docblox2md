@@ -85,28 +85,35 @@ The output style may be customized with an optional configuration file in the fo
 2. `.docblox2md.js` in your home directory (`$HOME/.docblox2md.js`)
 3. `.docblox2md.js` in the docblox2md installation directory
 
-Here's an example configuration file that shows the default settings:
+Here's an example configuration file that shows the default settings. Note that as of version 0.8.0, you can use either strings (when no variables are needed) or function templates (recommended) for each property.  When you want to keep the default value, you can omit the property entirely.
 
 ```javascript
+// Example
 module.exports = {
-  'output': {
-    'header': {
-      'pre': '',
-      'item': "`%s`\n",
-      'post': ''
-    },
-    'params': {
-      'pre': '\n**Parameters:**\n\n',
-      'item': "* `%s` — `%s` — %s\n", // varname, type, description
-      'post': '\n'
-    },
-    'return': {
-      'pre': '\n**Return:**\n\n',
-      'item': "%s %s\n",
-      'post': ''
-    }
-  }
-}
+	output: {
+		header: {
+			pre: '',
+			item: (v) => `\`${v.text}\`\n`,
+			post: '',
+		},
+		params: {
+			pre: '\n**Parameters:**\n\n',
+			item: (v) =>
+				`* \`${v.name}\` — \`${v.type}\`${
+					v.desc ? ` — ${v.desc}` : ''
+				}\n`,
+			post: '\n',
+		},
+		return: {
+			pre: '',
+			item: (v) =>
+				`\n**Returns:** \`${v.type || ''}\` ${
+					v.type || v.desc ? '—' : ''
+				} ${v.desc || ''}\n`,
+			post: '',
+		},
+	},
+};
 ```
 
 ## Supported Languages

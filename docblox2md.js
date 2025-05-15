@@ -8,35 +8,118 @@ var config = {
 	output: {
 		header: {
 			pre: '',
-			item: '`%s`\n',
+			item: (v) => `\`${v.text}\`\n`,
 			post: '',
 		},
 		params: {
 			pre: '\n**Parameters:**\n\n',
-			item: '* `%s` — `%s` — %s\n', // varname, type, description
+			item: (v) =>
+				`* \`${v.name}\` — \`${v.type}\`${
+					v.desc ? ` — ${v.desc}` : ''
+				}\n`,
 			post: '\n',
 		},
 		return: {
-			pre: '\n**Return:**\n\n',
-			item: '%s %s\n',
+			pre: '',
+			item: (v) =>
+				`\n**Returns:** \`${v.type || ''}\` ${
+					v.type || v.desc ? '—' : ''
+				} ${v.desc || ''}\n`,
 			post: '',
 		},
 	},
 };
 
-// list of optional custom config files to read ... 1st match wins
+/**
+ * Wrap value into a template function, if necessary
+ *
+ * @param {Function|*} value Function to pass through or any value to wrap in a function
+ * @returns {Function} Template function
+ */
+function stringToTemplateFunc(value) {
+	return typeof value === 'function'
+		? value
+		: typeof value === 'string'
+		? () => value
+		: () => '?';
+}
+
+/**
+ * Check if the value is an object
+ *
+ * @param {*} item The item to check
+ * @returns {Boolean} True if the item is an object
+ */
+function isObject(item) {
+	return item && typeof item === 'object' && !Array.isArray(item);
+}
+
+/**
+ * Deep merge two objects
+ *
+ * @param {Object} target The target object
+ * @param {Object} source The source object
+ * @returns {Object} The merged object
+ */
+function deepMerge(target, source) {
+	const output = Object.assign({}, target);
+
+	if (isObject(target) && isObject(source)) {
+		Object.keys(source).forEach((key) => {
+			if (isObject(source[key])) {
+				if (!(key in target)) {
+					Object.assign(output, { [key]: source[key] });
+				} else {
+					output[key] = deepMerge(target[key], source[key]);
+				}
+			} else {
+				Object.assign(output, { [key]: source[key] });
+			}
+		});
+	}
+
+	return output;
+}
+
+/**
+ * Process configuration object to convert string templates to functions
+ *
+ * @param {Object} cfg Configuration object
+ * @returns {Object} Processed configuration
+ */
+function processConfig(cfg) {
+	const processed = Object.assign({}, cfg);
+
+	// Process output section
+	if (processed.output) {
+		Object.keys(processed.output).forEach((sectionKey) => {
+			const section = processed.output[sectionKey];
+
+			if (isObject(section)) {
+				// Process each property (pre, item, post)
+				Object.keys(section).forEach((propKey) => {
+					section[propKey] = stringToTemplateFunc(section[propKey]);
+				});
+			}
+		});
+	}
+
+	return processed;
+}
+
 const aCfgfiles = [
 	process.cwd() + '/.docblox2md.js', // in working directory
 	path.join(process.env.HOME, '/.docblox2md.js'), // in $HOME
 	path.join(__dirname, '/.docblox2md.js'), // in install dir
 ];
-
+config = processConfig(config);
 for (var i = 0; i < aCfgfiles.length; i++) {
 	if (fs.existsSync(aCfgfiles[i])) {
 		process.stderr.write(
 			'Info: Using custom config ' + aCfgfiles[i] + '...\n'
 		);
-		var config = require(aCfgfiles[i]);
+		const userConfig = require(aCfgfiles[i]);
+		config = deepMerge(config, processConfig(userConfig));
 		break;
 	}
 }
@@ -199,38 +282,6 @@ function srcToBlocks(src) {
 }
 
 /**
- * sprintf implementation
- *
- * source:
- * https://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format?page=2&tab=scoredesc#tab-top
- *
- * @param {String} message string with %s as placeholder
- * @returns {String}
- */
-function _sprintf(message) {
-	const regexp = RegExp('%s', 'g');
-	let match;
-	let index = 1;
-	while ((match = regexp.exec(message)) !== null) {
-		let replacement = arguments[index];
-		if (replacement) {
-			let messageToArray = message.split('');
-			messageToArray.splice(
-				match.index,
-				regexp.lastIndex - match.index,
-				replacement
-			);
-			message = messageToArray.join('');
-			index++;
-		} else {
-			break;
-		}
-	}
-
-	return message;
-}
-
-/**
  * Generate Markdown from abstract blocks
  *
  * Visibility threshold can be:
@@ -364,19 +415,19 @@ function blocksToMarkdown(blocks, level, threshold) {
 		// Header
 		md.push(
 			'' +
-				(config.output.header.pre ? config.output.header.pre : '') +
+				config.output.header.pre({}) +
 				'#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0)) +
 				' ' +
-				_sprintf(
-					config.output.header.item,
-					'' +
+				config.output.header.item({
+					text:
+						'' +
 						// + (visibility ? visibility + ' ' : '')
 						// + (type ? type + ' ' : '')
 						// + (name ? name + ' ' : '')
 						(implem ? 'implements ' + implem + ' ' : '') +
-						blocks[i].code.replace(/\$/, '\\$')
-				) +
-				(config.output.header.post ? config.output.header.post : '')
+						blocks[i].code.replace(/\$/, '\\$'),
+				}) +
+				config.output.header.post({})
 		);
 		md.push('\n');
 
@@ -393,32 +444,30 @@ function blocksToMarkdown(blocks, level, threshold) {
 
 		// Parameters
 		if (params.length > 0) {
-			md.push(config.output.params.pre);
+			md.push(config.output.params.pre({}));
 
 			for (j = 0; j < params.length; j++) {
 				md.push(
-					_sprintf(
-						config.output.params.item,
-						params[j].name,
-						params[j].type,
-						params[j].desc ? params[j].desc : ''
-					)
+					config.output.params.item({
+						name: params[j].name || '',
+						type: params[j].type || '',
+						desc: params[j].desc || '',
+					})
 				);
 			}
-			md.push(config.output.params.post);
+			md.push(config.output.params.post({}));
 		}
 
 		// Return value
 		if (returnType !== '' || returnDesc !== '') {
-			md.push(config.output.return.pre);
+			md.push(config.output.return.pre({}));
 			md.push(
-				_sprintf(
-					config.output.return.item,
-					returnType + ' ',
-					returnDesc + ' '
-				)
-			),
-				md.push(config.output.return.post);
+				config.output.return.item({
+					type: returnType || '',
+					desc: returnDesc || '',
+				})
+			);
+			md.push(config.output.return.post({}));
 		}
 
 		// Final empty line
