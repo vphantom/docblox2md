@@ -4,7 +4,7 @@
   "description": "Generate Markdown from doc-comments",
   "main": "docblox2md.js",
   "bin": {
-    "docblox2md": "./cli.js"
+    "docblox2md": "cli.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
