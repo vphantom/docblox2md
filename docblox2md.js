@@ -1,119 +1,122 @@
 'use strict';
 
 var fs = require('fs');
-const path = require('path')
+const path = require('path');
 
 // default config data
-var config={
-  'output': {
-    'header': {
-      'pre': '',
-      'item': "`%s`\n",
-      'post': ''
-    },
-    'params': {
-      'pre': '\n**Parameters:**\n\n',
-      'item': "* `%s` — `%s` — %s\n", // varname, type, description
-      'post': '\n'
-    },
-    'return': {
-      'pre': '\n**Return:**\n\n',
-      'item': "%s %s\n",
-      'post': ''
-    }
-  }
-}
+var config = {
+	output: {
+		header: {
+			pre: '',
+			item: '`%s`\n',
+			post: '',
+		},
+		params: {
+			pre: '\n**Parameters:**\n\n',
+			item: '* `%s` — `%s` — %s\n', // varname, type, description
+			post: '\n',
+		},
+		return: {
+			pre: '\n**Return:**\n\n',
+			item: '%s %s\n',
+			post: '',
+		},
+	},
+};
 
 // list of optional custom config files to read ... 1st match wins
-const aCfgfiles=[
-  process.cwd()+'/.docblox2md.js',                  // in working directory
-  path.join(process.env.HOME, '/.docblox2md.js'),   // in $HOME
-  path.join(__dirname, '/.docblox2md.js'),          // in install dir
+const aCfgfiles = [
+	process.cwd() + '/.docblox2md.js', // in working directory
+	path.join(process.env.HOME, '/.docblox2md.js'), // in $HOME
+	path.join(__dirname, '/.docblox2md.js'), // in install dir
 ];
 
-for (var i=0; i<aCfgfiles.length; i++){
-  if (fs.existsSync(aCfgfiles[i])) {
-    process.stderr.write('Info: Using custom config '+aCfgfiles[i]+'...\n');
-    var config=require(aCfgfiles[i]);
-    break;
-  }
+for (var i = 0; i < aCfgfiles.length; i++) {
+	if (fs.existsSync(aCfgfiles[i])) {
+		process.stderr.write(
+			'Info: Using custom config ' + aCfgfiles[i] + '...\n'
+		);
+		var config = require(aCfgfiles[i]);
+		break;
+	}
 }
 
 /* eslint-disable max-len */
 var re = {
-  // Document level
+	// Document level
 
-  // mdSplit - Split Markdown by doc-comment placeholders
-  //
-  // Used with String.split(), the strings returned are a repeating sequence of:
-  // 1. Raw Markdown to preserve
-  // 2. Header level or undefined
-  // 3. File name
-  // The very last instance may end on raw Markdown without 2 and 3.
-  //
-  mdSplit: /<!--\s+BEGIN\s+DOC-COMMENT\s+(?:H([123456])\s+)?(\S+)\s+-->[^]*?<!--\s+END\s+DOC-COMMENT\s+-->/i,
+	// mdSplit - Split Markdown by doc-comment placeholders
+	//
+	// Used with String.split(), the strings returned are a repeating sequence of:
+	// 1. Raw Markdown to preserve
+	// 2. Header level or undefined
+	// 3. File name
+	// The very last instance may end on raw Markdown without 2 and 3.
+	//
+	mdSplit:
+		/<!--\s+BEGIN\s+DOC-COMMENT\s+(?:H([123456])\s+)?(\S+)\s+-->[^]*?<!--\s+END\s+DOC-COMMENT\s+-->/i,
 
-  // Source parsing level
+	// Source parsing level
 
-  // srcSplit - Split C/C++/Java/JavaScript/PHP source by doc-comment
-  //
-  // Used with String.split(), the strings returned are a repeating sequence of:
-  // 1. Ignore
-  // 2. Doc comment (excluding "/**" and "*/")
-  // 3. Next line of code
-  // The very last instance may end on ignore without 2 and 3.
-  //
-  // Note that it cannot handle nested comments (say in sample code, for
-  // example).
-  //
-  srcSplit: /(?:\/\*\*[^]*?\*\/\s*)?\/\*\*([^]*?)\*\/([^;{]+?)[;{]/,
+	// srcSplit - Split C/C++/Java/JavaScript/PHP source by doc-comment
+	//
+	// Used with String.split(), the strings returned are a repeating sequence of:
+	// 1. Ignore
+	// 2. Doc comment (excluding "/**" and "*/")
+	// 3. Next line of code
+	// The very last instance may end on ignore without 2 and 3.
+	//
+	// Note that it cannot handle nested comments (say in sample code, for
+	// example).
+	//
+	srcSplit: /(?:\/\*\*[^]*?\*\/\s*)?\/\*\*([^]*?)\*\/([^;{]+?)[;{]/,
 
-  // lineSplit - Get clean lines from doc comment
-  //
-  // Used with String.split(), the strings returned are a repeating sequence of:
-  // 1. Ignore
-  // 2. Trimmed line (inner indent preserved)
-  // The very last instance may end on ignore without 2.
-  //
-  lineSplit: /^\s*(?:\*\s)?(?:.*?)/m,
+	// lineSplit - Get clean lines from doc comment
+	//
+	// Used with String.split(), the strings returned are a repeating sequence of:
+	// 1. Ignore
+	// 2. Trimmed line (inner indent preserved)
+	// The very last instance may end on ignore without 2.
+	//
+	lineSplit: /^\s*(?:\*\s)?(?:.*?)/m,
 
-  // tag
-  //
-  // Used with String.match(), returns NULL if line is not a tag, an array otherwise:
-  // 1. Ignore
-  // 2. Tag (i.e. "param")
-  // 3. Rest of line
-  //
-  tag: /^\s*@(\S+)\s*(.*)$/,
+	// tag
+	//
+	// Used with String.match(), returns NULL if line is not a tag, an array otherwise:
+	// 1. Ignore
+	// 2. Tag (i.e. "param")
+	// 3. Rest of line
+	//
+	tag: /^\s*@(\S+)\s*(.*)$/,
 
-  // Tag parsing level
+	// Tag parsing level
 
-  // tagType
-  //
-  // Used with String.match()
-  // 1. Ignore
-  // 2. Argument
-  //
-  tagType: /^\{?([^\s}]+)\}?$/,
+	// tagType
+	//
+	// Used with String.match()
+	// 1. Ignore
+	// 2. Argument
+	//
+	tagType: /^\{?([^\s}]+)\}?$/,
 
-  // tagTypeName
-  //
-  // Used with String.match()
-  // 1. Ignore
-  // 2. Type (optional)
-  // 3. Name
-  //
-  tagTypeName: /^(?:\{?([^\s}]+)?\}?\s+)?(.*)$/,
+	// tagTypeName
+	//
+	// Used with String.match()
+	// 1. Ignore
+	// 2. Type (optional)
+	// 3. Name
+	//
+	tagTypeName: /^(?:\{?([^\s}]+)?\}?\s+)?(.*)$/,
 
-  // tagTypeNameDesc
-  //
-  // Used with String.match()
-  // 1. Ignore
-  // 2. Type
-  // 3. Name
-  // 4. Description (Optional)
-  //
-  tagTypeNameDesc: /^\{?([^\s}]+)\}?\s+([^-]\S*)(?:\s+-)?(?:\s+(.*))?$/,
+	// tagTypeNameDesc
+	//
+	// Used with String.match()
+	// 1. Ignore
+	// 2. Type
+	// 3. Name
+	// 4. Description (Optional)
+	//
+	tagTypeNameDesc: /^\{?([^\s}]+)\}?\s+([^-]\S*)(?:\s+-)?(?:\s+(.*))?$/,
 };
 /* eslint-enable max-len */
 
@@ -135,92 +138,96 @@ var re = {
  * @return {Array} Blocks
  */
 function srcToBlocks(src) {
-  var chunks = src.split(re.srcSplit);
-  var blocks = [];
-  var i = 0;
+	var chunks = src.split(re.srcSplit);
+	var blocks = [];
+	var i = 0;
 
-  for (i = 0; i < chunks.length; i++) {
-    let block = {
-      lines: [],
-      tags : [],
-      code : '',
-    };
-    let hasTag = false;
+	for (i = 0; i < chunks.length; i++) {
+		let block = {
+			lines: [],
+			tags: [],
+			code: '',
+		};
+		let hasTag = false;
 
-    // First of triplet: ignore
+		// First of triplet: ignore
 
-    // Iterate
-    i++;
-    if (i >= chunks.length) {
-      break;
-    }
+		// Iterate
+		i++;
+		if (i >= chunks.length) {
+			break;
+		}
 
-    // Second of triplet: doc-comment
-    let lines = chunks[i].split(re.lineSplit);
-    let j = 1;
+		// Second of triplet: doc-comment
+		let lines = chunks[i].split(re.lineSplit);
+		let j = 1;
 
-    // Only ignore very first line
-    for (j = 1; j < lines.length; j++) {
-      let line = lines[j].trimRight();
-      let tag = line.match(re.tag);
+		// Only ignore very first line
+		for (j = 1; j < lines.length; j++) {
+			let line = lines[j].trimRight();
+			let tag = line.match(re.tag);
 
-      if (tag === null) {
-        if (hasTag === false || line !== '') {
-          block.lines.push(line);
-        }
-      } else {
-        hasTag = true;
-        block.tags.push({
-          tag : tag[1],
-          line: tag[2],
-        });
-      }
-    }
+			if (tag === null) {
+				if (hasTag === false || line !== '') {
+					block.lines.push(line);
+				}
+			} else {
+				hasTag = true;
+				block.tags.push({
+					tag: tag[1],
+					line: tag[2],
+				});
+			}
+		}
 
-    // Iterate
-    i++;
-    if (i < chunks.length) {
-      // Third of triplet: code
-      let code = chunks[i].trim().replace(/\s+/g, ' ');
-      let variable = code.match(/^((var|let|const)\s+[^=\s]+)\s*=/);
+		// Iterate
+		i++;
+		if (i < chunks.length) {
+			// Third of triplet: code
+			let code = chunks[i].trim().replace(/\s+/g, ' ');
+			let variable = code.match(/^((var|let|const)\s+[^=\s]+)\s*=/);
 
-      block.code = (variable && variable[1]) ? variable[1] : code;
-    }
+			block.code = variable && variable[1] ? variable[1] : code;
+		}
 
-    if (block.lines.length > 0 || block.tags.length > 0) {
-      blocks.push(block);
-    }
-  }
+		if (block.lines.length > 0 || block.tags.length > 0) {
+			blocks.push(block);
+		}
+	}
 
-  return blocks;
+	return blocks;
 }
 
 /**
  * sprintf implementation
- * 
+ *
  * source:
  * https://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format?page=2&tab=scoredesc#tab-top
- * 
+ *
  * @param {String} message string with %s as placeholder
  * @returns {String}
  */
-function _sprintf(message){
-  const regexp = RegExp('%s','g');
-  let match;
-  let index = 1;
-  while((match = regexp.exec(message)) !== null) {
-      let replacement = arguments[index];
-      if (replacement) {
-          let messageToArray = message.split('');
-          messageToArray.splice(match.index, regexp.lastIndex - match.index, replacement);
-          message = messageToArray.join('');
-          index++;
-      } else {
-          break;
-      }
-  }
+function _sprintf(message) {
+	const regexp = RegExp('%s', 'g');
+	let match;
+	let index = 1;
+	while ((match = regexp.exec(message)) !== null) {
+		let replacement = arguments[index];
+		if (replacement) {
+			let messageToArray = message.split('');
+			messageToArray.splice(
+				match.index,
+				regexp.lastIndex - match.index,
+				replacement
+			);
+			message = messageToArray.join('');
+			index++;
+		} else {
+			break;
+		}
+	}
 
-  return message;
+	return message;
 }
 
 /**
@@ -239,187 +246,189 @@ function _sprintf(message){
  * @return {String} Markdown text
  */
 function blocksToMarkdown(blocks, level, threshold) {
-  var md = [];
-  var inClass = false;
-  var i = 0;
-  var j = 0;
+	var md = [];
+	var inClass = false;
+	var i = 0;
+	var j = 0;
 
-  if (level < 1 || level > 6) {
-    level = 1;
-  }
+	if (level < 1 || level > 6) {
+		level = 1;
+	}
 
-  nextBlock: for (i = 0; i < blocks.length; i++) {
-    let tagArgs = null;
-    let isClass = false;
-    let visibility = '';
-    let type = '';
-    let name = '';
-    let implem = '';
-    let params = [];
-    let returnType = '';
-    let returnDesc = '';
+	nextBlock: for (i = 0; i < blocks.length; i++) {
+		let tagArgs = null;
+		let isClass = false;
+		let visibility = '';
+		let type = '';
+		let name = '';
+		let implem = '';
+		let params = [];
+		let returnType = '';
+		let returnDesc = '';
 
-    // Gather useful information from tags
-    for (j = 0; j < blocks[i].tags.length; j++) {
-      let tag = blocks[i].tags[j];
+		// Gather useful information from tags
+		for (j = 0; j < blocks[i].tags.length; j++) {
+			let tag = blocks[i].tags[j];
 
-      switch (tag.tag) {
-        case 'class':
-        case 'module':
-        case 'interface':
-          inClass = true;
-          isClass = true;
-          tagArgs = tag.line.match(re.tagTypeName);
-          if (tagArgs !== null) {
-            type = tag.tag + ' ' + (tagArgs[1] || '');
-            name = tagArgs[2] || '';
-          }
-          break;
+			switch (tag.tag) {
+				case 'class':
+				case 'module':
+				case 'interface':
+					inClass = true;
+					isClass = true;
+					tagArgs = tag.line.match(re.tagTypeName);
+					if (tagArgs !== null) {
+						type = tag.tag + ' ' + (tagArgs[1] || '');
+						name = tagArgs[2] || '';
+					}
+					break;
 
-        case 'endclass':
-        case 'endmodule':
-        case 'endinterface':
-          inClass = false;
-          continue nextBlock;
+				case 'endclass':
+				case 'endmodule':
+				case 'endinterface':
+					inClass = false;
+					continue nextBlock;
 
-        case 'implements':
-          tagArgs = tag.line.match(re.tagType);
-          if (tagArgs !== null) {
-            implem = tagArgs[1] || '';
-          }
-          break;
+				case 'implements':
+					tagArgs = tag.line.match(re.tagType);
+					if (tagArgs !== null) {
+						implem = tagArgs[1] || '';
+					}
+					break;
 
-        case 'private':
-          visibility = tag.tag;
-          if (threshold < 2) {
-            continue nextBlock;
-          }
-          break;
-        case 'protected':
-          visibility = tag.tag;
-          if (threshold < 1) {
-            continue nextBlock;
-          }
-          break;
-        case 'public':
-          visibility = tag.tag;
-          break;
+				case 'private':
+					visibility = tag.tag;
+					if (threshold < 2) {
+						continue nextBlock;
+					}
+					break;
+				case 'protected':
+					visibility = tag.tag;
+					if (threshold < 1) {
+						continue nextBlock;
+					}
+					break;
+				case 'public':
+					visibility = tag.tag;
+					break;
 
-        case 'access':
-          switch (tag.line) {
-            case 'public':
-              visibility = tag.line;
-              break;
-            case 'protected':
-              if (threshold < 1) {
-                continue nextBlock;
-              }
-              visibility = tag.line;
-              break;
-            case 'private':
-              if (threshold < 2) {
-                continue nextBlock;
-              }
-              visibility = tag.line;
-              break;
-            default:
-          }
-          break;
+				case 'access':
+					switch (tag.line) {
+						case 'public':
+							visibility = tag.line;
+							break;
+						case 'protected':
+							if (threshold < 1) {
+								continue nextBlock;
+							}
+							visibility = tag.line;
+							break;
+						case 'private':
+							if (threshold < 2) {
+								continue nextBlock;
+							}
+							visibility = tag.line;
+							break;
+						default:
+					}
+					break;
 
-        case 'param':
-        case 'parameter':
-          tagArgs = tag.line.match(re.tagTypeNameDesc);
-          if (tagArgs !== null) {
-            params.push({
-              type: tagArgs[1] || '',
-              name: tagArgs[2] || '',
-              desc: tagArgs[3] || '',
-            });
-          }
-          break;
+				case 'param':
+				case 'parameter':
+					tagArgs = tag.line.match(re.tagTypeNameDesc);
+					if (tagArgs !== null) {
+						params.push({
+							type: tagArgs[1] || '',
+							name: tagArgs[2] || '',
+							desc: tagArgs[3] || '',
+						});
+					}
+					break;
 
-        case 'return':
-        case 'returns':
-          tagArgs = tag.line.match(re.tagTypeName);
-          if (tagArgs !== null) {
-            returnType = tagArgs[1] || '';
-            returnDesc = tagArgs[2] || '';
-          }
-          break;
+				case 'return':
+				case 'returns':
+					tagArgs = tag.line.match(re.tagTypeName);
+					if (tagArgs !== null) {
+						returnType = tagArgs[1] || '';
+						returnDesc = tagArgs[2] || '';
+					}
+					break;
 
-        case 'ignore':
-          continue nextBlock;
+				case 'ignore':
+					continue nextBlock;
 
-        default:
-      }
-    }
+				default:
+			}
+		}
 
-    // Header
-    md.push(
-      ''
-      + (config.output.header.pre ? config.output.header.pre : '') 
-      + '#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0))
-      + ' '
-      +_sprintf(
-        config.output.header.item, 
-          ''
-          // + (visibility ? visibility + ' ' : '')
-          // + (type ? type + ' ' : '')
-          // + (name ? name + ' ' : '')
-          + (implem ? 'implements ' + implem + ' ' : '')
-          + blocks[i].code.replace(/\$/, "\\$")
-      )
-      + (config.output.header.post ? config.output.header.post : '') 
-    )
-    md.push('\n');
+		// Header
+		md.push(
+			'' +
+				(config.output.header.pre ? config.output.header.pre : '') +
+				'#'.repeat(Number(level) + (inClass && !isClass ? 1 : 0)) +
+				' ' +
+				_sprintf(
+					config.output.header.item,
+					'' +
+						// + (visibility ? visibility + ' ' : '')
+						// + (type ? type + ' ' : '')
+						// + (name ? name + ' ' : '')
+						(implem ? 'implements ' + implem + ' ' : '') +
+						blocks[i].code.replace(/\$/, '\\$')
+				) +
+				(config.output.header.post ? config.output.header.post : '')
+		);
+		md.push('\n');
 
-    // Verbatim lines
-    for (j = 0; j < blocks[i].lines.length; j++) {
-      if (blocks[i].lines[j] === '') {
-        md.push('\n\n');
-      } else if (blocks[i].lines[j].match(/^\s/)) {
-        md.push(blocks[i].lines[j] + '\n');
-      } else {
-        md.push(blocks[i].lines[j] + ' ');
-      }
-    }
+		// Verbatim lines
+		for (j = 0; j < blocks[i].lines.length; j++) {
+			if (blocks[i].lines[j] === '') {
+				md.push('\n\n');
+			} else if (blocks[i].lines[j].match(/^\s/)) {
+				md.push(blocks[i].lines[j] + '\n');
+			} else {
+				md.push(blocks[i].lines[j] + ' ');
+			}
+		}
 
-    // Parameters
-    if (params.length > 0) {
-      md.push(config.output.params.pre)
-    
-      for (j = 0; j < params.length; j++) {
-        md.push(
-          _sprintf(
-            config.output.params.item, 
-            params[j].name, 
-            params[j].type,
-            (params[j].desc ? params[j].desc : '')
-          )
-        )
-      }
-      md.push(config.output.params.post)
-    }
+		// Parameters
+		if (params.length > 0) {
+			md.push(config.output.params.pre);
 
-    // Return value
-    if (returnType !== '' || returnDesc !== '') {
-      md.push(config.output.return.pre)
-      md.push(
-        _sprintf(
-          config.output.return.item,
-          returnType+' ',
-          returnDesc+' '
-          )
-      ),
-      md.push(config.output.return.post)
-    }
+			for (j = 0; j < params.length; j++) {
+				md.push(
+					_sprintf(
+						config.output.params.item,
+						params[j].name,
+						params[j].type,
+						params[j].desc ? params[j].desc : ''
+					)
+				);
+			}
+			md.push(config.output.params.post);
+		}
 
-    // Final empty line
-    md.push('\n');
-  }
+		// Return value
+		if (returnType !== '' || returnDesc !== '') {
+			md.push(config.output.return.pre);
+			md.push(
+				_sprintf(
+					config.output.return.item,
+					returnType + ' ',
+					returnDesc + ' '
+				)
+			),
+				md.push(config.output.return.post);
+		}
 
-  return md.join('').replace(/(\n\n\n+)/g, '\n\n')
-		.replace(/([ \t]+$)/mg, '');
+		// Final empty line
+		md.push('\n');
+	}
+
+	return md
+		.join('')
+		.replace(/(\n\n\n+)/g, '\n\n')
+		.replace(/([ \t]+$)/gm, '');
 }
 
 /**
@@ -438,9 +447,9 @@ function blocksToMarkdown(blocks, level, threshold) {
  * @return {String} Markdown text
  */
 function srcToMarkdown(src, level, threshold) {
-  var blocks = srcToBlocks(src);
+	var blocks = srcToBlocks(src);
 
-  return blocksToMarkdown(blocks, level, threshold);
+	return blocksToMarkdown(blocks, level, threshold);
 }
 
 /**
@@ -459,22 +468,22 @@ function srcToMarkdown(src, level, threshold) {
  * @return {String} Markdown text with placeholder envelope
  */
 function loadFile(filename, level, threshold) {
-  var out = [];
-  var file;
+	var out = [];
+	var file;
 
-  out.push('<!-- BEGIN DOC-COMMENT H' + level + ' ' + filename + ' -->\n');
-  out.push('<!-- AUTOMATICALLY GENERATED, DO NOT EDIT -->\n');
+	out.push('<!-- BEGIN DOC-COMMENT H' + level + ' ' + filename + ' -->\n');
+	out.push('<!-- AUTOMATICALLY GENERATED, DO NOT EDIT -->\n');
 
-  try {
-    file = fs.readFileSync(filename, {encoding: 'utf-8'});
-    out.push(srcToMarkdown(file, level, threshold));
-  } catch (e) {
-    // I don't see how we can relay this error safely
-  }
+	try {
+		file = fs.readFileSync(filename, { encoding: 'utf-8' });
+		out.push(srcToMarkdown(file, level, threshold));
+	} catch (e) {
+		// I don't see how we can relay this error safely
+	}
 
-  out.push('<!-- END DOC-COMMENT -->');
+	out.push('<!-- END DOC-COMMENT -->');
 
-  return out.join('');
+	return out.join('');
 }
 
 /**
@@ -485,7 +494,7 @@ function loadFile(filename, level, threshold) {
  * @return {Boolean}
  */
 function hasPlaceholder(doc) {
-  return doc.split(re.mdSplit).length > 1;
+	return doc.split(re.mdSplit).length > 1;
 }
 
 /**
@@ -503,48 +512,48 @@ function hasPlaceholder(doc) {
  * @return {String} Updated document
  */
 function filterDocument(doc, threshold) {
-  var sections = doc.split(re.mdSplit);
-  var out = [];
-  var i = 0;
+	var sections = doc.split(re.mdSplit);
+	var out = [];
+	var i = 0;
 
-  for (i = 0; i < sections.length; i++) {
-    // 1. Raw input to preserve
-    out.push(sections[i]);
+	for (i = 0; i < sections.length; i++) {
+		// 1. Raw input to preserve
+		out.push(sections[i]);
 
-    // Iterate
-    i++;
-    if (i >= sections.length) {
-      break;
-    }
+		// Iterate
+		i++;
+		if (i >= sections.length) {
+			break;
+		}
 
-    // 2. Header level
-    let level = sections[i];
+		// 2. Header level
+		let level = sections[i];
 
-    if (level === undefined) {
-      level = 1;
-    }
+		if (level === undefined) {
+			level = 1;
+		}
 
-    // Iterate
-    i++;
-    if (i >= sections.length) {
-      break;
-    }
+		// Iterate
+		i++;
+		if (i >= sections.length) {
+			break;
+		}
 
-    // 3. File name
-    out.push(loadFile(sections[i], level, threshold));
-  }
+		// 3. File name
+		out.push(loadFile(sections[i], level, threshold));
+	}
 
-  return out.join('');
+	return out.join('');
 }
 
 module.exports = {
-  // Partial processing
-  srcToBlocks     : srcToBlocks,
-  blocksToMarkdown: blocksToMarkdown,
-  srcToMarkdown   : srcToMarkdown,
+	// Partial processing
+	srcToBlocks: srcToBlocks,
+	blocksToMarkdown: blocksToMarkdown,
+	srcToMarkdown: srcToMarkdown,
 
-  hasPlaceholder  : hasPlaceholder,
+	hasPlaceholder: hasPlaceholder,
 
-  // End-to-end processing
-  filterDocument: filterDocument,
+	// End-to-end processing
+	filterDocument: filterDocument,
 };
